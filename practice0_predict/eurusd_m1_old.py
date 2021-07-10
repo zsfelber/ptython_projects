@@ -53,6 +53,8 @@ train = dataset[0:9900,:]
 valid = dataset[9900:,:]
 
 
+
+
 #converting dataset into x_train and y_train
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_data = scaler.fit_transform(dataset)
@@ -67,6 +69,16 @@ for i in range(scaled_data.shape[0]-10,scaled_data.shape[0]):
 
 train_len = 10
 history_points = train_len
+#x_train, y_train = [], []
+#for i in range(train_len,len(train)):
+#    x_train.append(scaled_data[i-train_len:i,0])
+#    y_train.append(scaled_data[i,0])
+#x_train, y_train = np.array(x_train), np.array(y_train)
+
+#print('\n x_train shape:')
+#print(x_train.shape)
+
+#x_train = np.reshape(x_train, (x_train.shape[0],x_train.shape[1],1))
 
 train_normalised_data = scaled_data
 
