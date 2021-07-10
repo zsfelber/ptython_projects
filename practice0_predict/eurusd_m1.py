@@ -17,7 +17,8 @@ scaler = MinMaxScaler(feature_range=(0, 1))
 
 #read the file
 df0 = pd.read_csv('f:/EURUSD_M5_200001030000_202107092350.csv', sep='\t')
-df = df0.head(10000)
+df = df0.tail(10000)
+df.iloc[::-1]
 
 # looking at the first five rows of the data
 print(df.head())
@@ -78,7 +79,7 @@ model.compile(loss='mean_squared_error', optimizer='adam')
 model.fit(x_train, y_train, epochs=1, batch_size=1, verbose=2)
 
 #predicting 9900..10000 values, using past <train_len> bars for each one from the train data
-inputs = new_data[len(new_data) - len(valid) - train_len:].values
+inputs = df[len(df) - len(valid) - train_len:].values
 #inputs = inputs.reshape(-1,1)
 inputs = scaler.transform(inputs)
 
@@ -104,8 +105,8 @@ print(rms)
 train = df[9000:9900]
 valid = df[9900:]
 valid['Predictions'] = closing_price
-plt.plot(train['Close'])
-plt.plot(valid[['Close','Predictions']])
+plt.plot(train['<CLOSE>'])
+plt.plot(valid[['<CLOSE>','Predictions']])
 
 
 
