@@ -13,9 +13,10 @@ from keras import optimizers
 from keras.callbacks import History
 from sklearn.metrics import mean_squared_error
 
+# https://github.com/yuhaolee97/stock-project
 
-# column = 'Adj Close'
-column = '<CLOSE>'
+# price_column_id = 'Adj Close'
+price_column_id = '<CLOSE>'
 
 
 def train_test_split_preparation(new_df, data_set_points, train_split):
@@ -29,21 +30,21 @@ def train_test_split_preparation(new_df, data_set_points, train_split):
     test_data = test_data.reset_index()
     test_data = test_data.drop(columns=['index'])
 
-    train_arr = np.diff(train_data.loc[:, [column]].values, axis=0)
-    test_arr = np.diff(test_data.loc[:, [column]].values, axis=0)
+    train_arr = np.diff(train_data.loc[:, [price_column_id]].values, axis=0)
+    test_arr = np.diff(test_data.loc[:, [price_column_id]].values, axis=0)
 
     X_train = np.array([train_arr[i: i + data_set_points] for i in range(len(train_arr) - data_set_points)])
 
     y_train = np.array([train_arr[i + data_set_points] for i in range(len(train_arr) - data_set_points)])
 
-    y_valid = np.array([train_data[column][-(int)(len(y_train) / 10):].copy()])
+    y_valid = np.array([train_data[price_column_id][-(int)(len(y_train) / 10):].copy()])
 
     y_valid = y_valid.flatten()
     y_valid = np.expand_dims(y_valid, -1)
 
     X_test = np.array([test_arr[i: i + data_set_points] for i in range(len(test_arr) - data_set_points)])
 
-    y_test = np.array([test_data[column][i + data_set_points] for i in range(len(test_arr) - data_set_points)])
+    y_test = np.array([test_data[price_column_id][i + data_set_points] for i in range(len(test_arr) - data_set_points)])
 
     return X_train, y_train, X_test, y_test, test_data
 
@@ -65,7 +66,8 @@ def lstm_model(X_train, y_train, data_set_points):
     output = Activation('linear', name='output')(inputs)
 
     model = Model(inputs=lstm_input, outputs=output)
-    adam = optimizers.Adam(lr=0.002)
+    # adam = optimizers.Adam(lr=0.002)
+    adam = optimizers.Adam()
 
     model.compile(optimizer=adam, loss='mse')
     model.fit(x=X_train, y=y_train, batch_size=15, epochs=25, shuffle=True, validation_split=0.1)
@@ -144,20 +146,25 @@ if __name__ == "__main__":
     #stock_df = pd.read_csv(
     #    './stock-project/csv_files/google_stocks_data.csv')  # Note this data was pulled on 6 October 2020, some data may have changed since then
 
-    df0 = pd.read_csv('f:/EURUSD_M5_200001030000_202107092350.csv', sep='\t')
-    df = df0.tail(10000)
+    #df0 = pd.read_csv('f:/EURUSD_M5_200001030000_202107092350.csv', sep='\t')
+    #df = df0.tail(10000)
+    df = pd.read_csv('f:/EURUSD_Daily_199001020000_202107090000.csv', sep='\t')
+
     df.iloc[::-1]
-    df['Time0'] = df[['<DATE>', '<TIME>']].apply(lambda x: ' '.join(x), axis=1)
-    df['Time'] = pd.to_datetime(df['Time0'], format='%Y%m%d %H:%M:%S')
-    df.index = df.Time
-    df.drop(['<DATE>', '<TIME>', '<OPEN>', '<HIGH>', '<LOW>', '<TICKVOL>', '<VOL>', '<SPREAD>', 'Time0', 'Time'], axis=1, inplace=True)
+    # df['Time0'] = df[['<DATE>', '<TIME>']].apply(lambda x: ' '.join(x), axis=1)
+    # df['Time'] = pd.to_datetime(df['Time0'], format='%Y%m%d %H:%M:%S')
+    # df.index = df.Time
+    # df.drop(['<DATE>', '<TIME>', '<OPEN>', '<HIGH>', '<LOW>', '<TICKVOL>', '<VOL>', '<SPREAD>', 'Time0', 'Time'], axis=1, inplace=True)
+    #df.drop(['<DATE>', '<TIME>', '<OPEN>', '<HIGH>', '<LOW>', '<TICKVOL>', '<VOL>', '<SPREAD>'], axis=1, inplace=True)
+    df.drop(['<DATE>', '<OPEN>', '<HIGH>', '<LOW>', '<TICKVOL>', '<VOL>', '<SPREAD>'], axis=1, inplace=True)
+    df.index = np.arange(0, df.shape[0])
     stock_df = df
 
-    train_split = 0.7
+    train_split = 0.9
 
     data_set_points = 21
 
-    new_df = stock_df[[column]].copy()
+    new_df = stock_df[[price_column_id]].copy()
 
     # Train test split
 
@@ -173,10 +180,10 @@ if __name__ == "__main__":
 
     # actual represents the test set's actual stock prices
     actual = np.array(
-        [test_data[column][i + data_set_points].copy() for i in range(len(test_data) - data_set_points)])
+        [test_data[price_column_id][i + data_set_points].copy() for i in range(len(test_data) - data_set_points)])
 
     # reference represents the stock price of the point before the prediction, so we can iteratively add the difference
-    reference = test_data[column][data_set_points - 1]
+    reference = test_data[price_column_id][data_set_points - 1]
 
     predicted = []
 
