@@ -7,6 +7,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+import tensorflow as tf
+import keras
+from keras import optimizers
+from keras.callbacks import History
+from keras.models import Model
+from keras.layers import Dense, Dropout, LSTM, Input, Activation, concatenate
+import numpy as np
+tf.random.set_seed(20)
+np.random.seed(10)
+
 
 #setting figure size
 from matplotlib.pylab import rcParams
@@ -69,14 +79,49 @@ print(x_train.shape)
 
 x_train = np.reshape(x_train, (x_train.shape[0],x_train.shape[1],1))
 
+# https://www.analyticsvidhya.com/blog/2018/10/predicting-stock-price-machine-learningnd-deep-learning-techniques-python/?#
 # create and fit the LSTM network
-model = Sequential()
-model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1],1)))
-model.add(LSTM(units=50))
-model.add(Dense(1))
+# model = Sequential()
+# model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1],1)))
+# model.add(LSTM(units=50))
+# model.add(Dense(1))
+# #validation_split = 0.1
+# model.compile(loss='mean_squared_error', optimizer='adam')
+# model.fit(x_train, y_train, epochs=25, batch_size=10, verbose=2, shuffle=True)
 
-model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(x_train, y_train, epochs=1, batch_size=1, verbose=2)
+# https://medium.com/analytics-vidhya/analysis-of-stock-price-predictions-using-lstm-models-f993faa524c4
+# 1,2,3
+# lstm_input = Input(shape=(history_points, 6), name='lstm_input')
+# inputs = LSTM(21, name='first_layer')(lstm_input)
+# inputs = Dense(1, name='dense_layer')(inputs)
+# output = Activation('linear', name='output')(inputs)
+# model = Model(inputs=lstm_input, outputs=output)
+# adam = optimizers.Adam()
+# model.compile(optimizer=adam, loss='mse')
+# model.fit(x=X_train, y=y_train, batch_size=15, epochs=30, shuffle=True, validation_split = 0.1)
+# ->
+# lstm_input = Input(shape=(history_points, 6), name='lstm_input')
+# inputs = LSTM(21, name='first_layer')(lstm_input)
+# inputs = Dense(16, name='first_dense_layer')(inputs)
+# inputs = Dense(1, name='second_dense_layer')(inputs)
+# output = Activation('linear', name='output')(inputs)
+# model = Model(inputs=lstm_input, outputs=output)
+# adam = optimizers.Adam(lr = 0.0008)
+# model.compile(optimizer=adam, loss='mse')
+# model.fit(x=X_train, y=y_train, batch_size=15, epochs=170, shuffle=True, validation_split = 0.1)
+# ->
+# lstm_input = Input(shape=(data_set_points, 1), name='lstm_input')
+# inputs = LSTM(21, name='first_layer', return_sequences = True)(lstm_input)
+# inputs = Dropout(0.1, name='first_dropout_layer')(inputs)
+# inputs = LSTM(64, name='lstm_1')(inputs)
+# inputs = Dropout(0.05, name='lstm_dropout_1')(inputs)
+# inputs = Dense(32, name='first_dense_layer')(inputs)
+# inputs = Dense(1, name='dense_layer')(inputs)
+# output = Activation('linear', name='output')(inputs)
+# model = Model(inputs=lstm_input, outputs=output)
+# adam = optimizers.Adam(lr = 0.002)
+# model.compile(optimizer=adam, loss='mse')
+# model.fit(x=X_train, y=y_train, batch_size=15, epochs=25, shuffle=True, validation_split = 0.1)
 
 #predicting 9900..10000 values, using past <train_len> bars for each one from the train data
 inputs = df[len(df) - len(valid) - train_len:].values
@@ -107,6 +152,5 @@ valid = df[9900:]
 valid['Predictions'] = closing_price
 plt.plot(train['<CLOSE>'])
 plt.plot(valid[['<CLOSE>','Predictions']])
-
 
 
