@@ -38,8 +38,8 @@ print(df.head())
 #creating train and test sets
 dataset = df.values
 
-train = dataset[0:9000,:]
-valid = dataset[9000:,:]
+train = dataset[0:9900,:]
+valid = dataset[9900:,:]
 
 
 
@@ -56,7 +56,7 @@ print(scaled_data.shape)
 for i in range(scaled_data.shape[0]-10,scaled_data.shape[0]):
     print(scaled_data[i][0])
 
-train_len = 3
+train_len = 10
 x_train, y_train = [], []
 for i in range(train_len,len(train)):
     x_train.append(scaled_data[i-train_len:i,0])
@@ -77,7 +77,7 @@ model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
 model.fit(x_train, y_train, epochs=1, batch_size=1, verbose=2)
 
-#predicting 246 values, using past <train_len> bars for each one from the train data
+#predicting 9900..10000 values, using past <train_len> bars for each one from the train data
 inputs = new_data[len(new_data) - len(valid) - train_len:].values
 #inputs = inputs.reshape(-1,1)
 inputs = scaler.transform(inputs)
@@ -101,8 +101,8 @@ print(rms)
 
 
 #for plotting
-train = new_data[:987]
-valid = new_data[987:]
+train = df[9000:9900]
+valid = df[9900:]
 valid['Predictions'] = closing_price
 plt.plot(train['Close'])
 plt.plot(valid[['Close','Predictions']])
